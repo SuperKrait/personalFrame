@@ -1,0 +1,7 @@
+F:\CSharp_Projects\WinFormBase\LogicModel\bin\Release\LogicModel.dll
+F:\CSharp_Projects\WinFormBase\LogicModel\bin\Release\LogicModel.pdb
+F:\CSharp_Projects\WinFormBase\LogicModel\obj\Release\LogicModel.csprojResolveAssemblyReference.cache
+F:\CSharp_Projects\WinFormBase\LogicModel\obj\Release\LogicModel.dll
+F:\CSharp_Projects\WinFormBase\LogicModel\obj\Release\LogicModel.pdb
+F:\CSharp_Projects\WinFormBase\Release\LogicModel.dll
+F:\CSharp_Projects\WinFormBase\Release\LogicModel.pdb

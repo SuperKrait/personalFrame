@@ -1,0 +1,16 @@
+F:\CSharp_Projects\WinFormBase\UI\bin\Debug\UI.exe.config
+F:\CSharp_Projects\WinFormBase\UI\obj\Debug\UI.csprojResolveAssemblyReference.cache
+F:\CSharp_Projects\WinFormBase\UI\obj\Debug\UI.Properties.Resources.resources
+F:\CSharp_Projects\WinFormBase\UI\obj\Debug\UI.csproj.GenerateResource.Cache
+F:\CSharp_Projects\WinFormBase\UI\obj\Debug\UI.MainForm.resources
+F:\CSharp_Projects\WinFormBase\Bin\UI.exe.config
+F:\CSharp_Projects\WinFormBase\UI\obj\Debug\UI.LoginForm.resources
+F:\CSharp_Projects\WinFormBase\UI\obj\Debug\UI.InitForm.resources
+F:\CSharp_Projects\WinFormBase\UI\obj\Debug\UI.UploadForm.resources
+F:\CSharp_Projects\WinFormBase\Bin\UI.exe
+F:\CSharp_Projects\WinFormBase\Bin\UI.pdb
+F:\CSharp_Projects\WinFormBase\UI\obj\Debug\UI.exe
+F:\CSharp_Projects\WinFormBase\UI\obj\Debug\UI.pdb
+K:\git\Base\Bin\UI.exe.config
+K:\git\Base\UI\obj\Debug\UI.exe
+K:\git\Base\UI\obj\Debug\UI.pdb

@@ -1,0 +1,7 @@
+F:\CSharp_Projects\WinFormBase\LocolFileModel\bin\Release\LocolFileModel.dll
+F:\CSharp_Projects\WinFormBase\LocolFileModel\bin\Release\LocolFileModel.pdb
+F:\CSharp_Projects\WinFormBase\LocolFileModel\obj\Release\LocolFileModel.dll
+F:\CSharp_Projects\WinFormBase\LocolFileModel\obj\Release\LocolFileModel.pdb
+F:\CSharp_Projects\WinFormBase\Release\LocolFileModel.dll
+F:\CSharp_Projects\WinFormBase\Release\LocolFileModel.pdb
+F:\CSharp_Projects\WinFormBase\LocolFileModel\obj\Release\LocolFileModel.csprojResolveAssemblyReference.cache

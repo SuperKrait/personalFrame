@@ -1,0 +1,7 @@
+F:\CSharp_Projects\WinFormBase\DataModel\bin\Release\DataModel.dll
+F:\CSharp_Projects\WinFormBase\DataModel\bin\Release\DataModel.pdb
+F:\CSharp_Projects\WinFormBase\DataModel\obj\Release\DataModel.dll
+F:\CSharp_Projects\WinFormBase\DataModel\obj\Release\DataModel.pdb
+F:\CSharp_Projects\WinFormBase\Release\DataModel.dll
+F:\CSharp_Projects\WinFormBase\Release\DataModel.pdb
+F:\CSharp_Projects\WinFormBase\DataModel\obj\Release\DataModel.csprojResolveAssemblyReference.cache

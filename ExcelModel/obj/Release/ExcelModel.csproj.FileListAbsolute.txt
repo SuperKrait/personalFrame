@@ -1,0 +1,8 @@
+F:\CSharp_Projects\WinFormBase\ExcelModel\bin\Release\ExcelModel.dll
+F:\CSharp_Projects\WinFormBase\ExcelModel\bin\Release\ExcelModel.pdb
+F:\CSharp_Projects\WinFormBase\ExcelModel\obj\Release\Interop.Office.dll
+F:\CSharp_Projects\WinFormBase\ExcelModel\obj\Release\ExcelModel.csproj.ResolveComReference.cache
+F:\CSharp_Projects\WinFormBase\ExcelModel\obj\Release\ExcelModel.dll
+F:\CSharp_Projects\WinFormBase\ExcelModel\obj\Release\ExcelModel.pdb
+F:\CSharp_Projects\WinFormBase\Release\ExcelModel.dll
+F:\CSharp_Projects\WinFormBase\Release\ExcelModel.pdb

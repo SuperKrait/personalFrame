@@ -1,0 +1,7 @@
+F:\CSharp_Projects\WinFormBase\NetModel\bin\Release\NetModel.dll
+F:\CSharp_Projects\WinFormBase\NetModel\bin\Release\NetModel.pdb
+F:\CSharp_Projects\WinFormBase\NetModel\obj\Release\NetModel.dll
+F:\CSharp_Projects\WinFormBase\NetModel\obj\Release\NetModel.pdb
+F:\CSharp_Projects\WinFormBase\Release\NetModel.dll
+F:\CSharp_Projects\WinFormBase\Release\NetModel.pdb
+F:\CSharp_Projects\WinFormBase\NetModel\obj\Release\NetModel.csprojResolveAssemblyReference.cache

@@ -1,0 +1,7 @@
+F:\CSharp_Projects\WinFormBase\Common\bin\Release\Common.dll
+F:\CSharp_Projects\WinFormBase\Common\bin\Release\Common.pdb
+F:\CSharp_Projects\WinFormBase\Common\obj\Release\Common.dll
+F:\CSharp_Projects\WinFormBase\Common\obj\Release\Common.pdb
+F:\CSharp_Projects\WinFormBase\Release\Common.dll
+F:\CSharp_Projects\WinFormBase\Release\Common.pdb
+F:\CSharp_Projects\WinFormBase\Common\obj\Release\Common.csprojResolveAssemblyReference.cache
