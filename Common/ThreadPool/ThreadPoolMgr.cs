@@ -171,7 +171,9 @@ namespace Common.ThreadPool
                     return;
                 }
             lock (idleQueue)
+            {
                 idleQueue.Enqueue(item);
+            }
             ThreadQueueHandle();
         }
         /// <summary>
@@ -372,6 +374,18 @@ namespace Common.ThreadPool
             lock (idleQueue)
             {
                 return idleQueue.Count;
+            }
+        }
+
+        /// <summary>
+        /// 获取线程池中等待执行的数量
+        /// </summary>
+        /// <returns></returns>
+        public int GetAliveCount()
+        {
+            lock (aliveList)
+            {
+                return aliveList.Count;
             }
         }
         /// <summary>

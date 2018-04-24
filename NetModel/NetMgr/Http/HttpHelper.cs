@@ -10,11 +10,13 @@ using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
 using System.Diagnostics;
 using System.Collections.Specialized;
+using System.Threading;
 
 namespace NetModel.NetMgr.Http
 {
     public static class HttpHelper
     {
+        public const int bufferSize = 1024 * 1024;
 
         /// <summary>
         /// 创建POST方式的HTTP请求
@@ -161,6 +163,18 @@ namespace NetModel.NetMgr.Http
                     if(dataCustom != null && dataCustom.Length > 0)
                         stream.Write(dataCustom, 0, dataCustom.Length);
                 }
+
+                //byte[] data = new byte[bufferSize];
+                //while (true)
+                //{
+                //    stream.Seek(0, SeekOrigin.Begin);
+                //    int count = stream.Read(data, 0, data.Length);
+                //    if (count > 0)
+                //        streamRequest.Write(data, 0, count);
+                //    else
+                //        break;
+                //    Thread.Sleep(0);
+                //}
             }
 
             HttpWebResponse reponse = null;
@@ -346,16 +360,19 @@ namespace NetModel.NetMgr.Http
         /// <param name="url"></param>
         /// <param name="timeOut"></param>
         /// <param name="form">表单文件</param>
+        /// <param name="speedCallBack">当前下载速度回调,毫秒级别回调</param>
         /// <returns></returns>
-        public static HttpWebResponse HttpPostData(string url, 
+        public static HttpWebResponse HttpPostData(string url,
             int timeOut,
             FormData form,
             IDictionary<HttpRequestHeader, string> header,
             IDictionary<string, string> headerCustom,
             CookieCollection cookies,
-            NetErrorHandle errorHandler
+            NetErrorHandle errorHandler,
+            GetNetSpeed speedCallBack = null
             )
         {
+            Debug.Print("发送开始" + url);
             HttpWebRequest request;
 
             if (url.StartsWith("https", StringComparison.OrdinalIgnoreCase))
@@ -456,47 +473,76 @@ namespace NetModel.NetMgr.Http
             form.GetWordsFromData(stream, boundary);
             request.ContentLength = stream.Length;
 
-
-            using (Stream streamRequest = request.GetRequestStream())
+            try
             {
-                stream.Seek(0, SeekOrigin.Begin);
-                byte[] data = new byte[stream.Length];
-                int count = stream.Read(data, 0, data.Length);
-                streamRequest.Write(data, 0, count);
+                using (Stream streamRequest = request.GetRequestStream())
+                {
+                    byte[] data = new byte[bufferSize];
+                    stream.Seek(0, SeekOrigin.Begin);
+                    int dataTotolCount = 0;
+                    while (true)
+                    {                                 
+                        int count = stream.Read(data, 0, data.Length);
+                        dataTotolCount = dataTotolCount + count;
+                        if (count > 0)
+                            streamRequest.Write(data, 0, count);
+                        else
+                            break;
+                        Thread.Sleep(0);
+                        if (speedCallBack != null)
+                        {
+                            speedCallBack(url, count);
+                        }
+                    }
+                    
+                }
+            }
+            catch (Exception e)
+            {
+                stream.Close();
+                errorHandler(url, e.ToString());
+                return null;
             }
 
-            HttpWebResponse reponse = null;
 
+            HttpWebResponse reponse = null;
+            
             try
             {
                 reponse = request.GetResponse() as HttpWebResponse;
+                stream.Close();
             }
             catch (System.Net.ProtocolViolationException e)
             {
+                stream.Close();
                 errorHandler(url, e.ToString());
                 return null;
             }
             catch (System.Net.WebException e)
             {
+                stream.Close();
                 HttpWebResponse errorReponse = e.Response as HttpWebResponse;
                 errorHandler(url, e.ToString() + "\r\n" + GetErrorReponseContent(errorReponse));
             }
             catch (System.InvalidOperationException e)
             {
+                stream.Close();
                 errorHandler(url, e.ToString());
                 return null;
             }
             catch (System.NotSupportedException e)
             {
+                stream.Close();
                 errorHandler(url, e.ToString());
                 return null;
             }
             catch (System.Exception e)
             {
+                stream.Close();
                 errorHandler(url, e.ToString());
                 return null;
             }
-
+            Debug.Print("发送完毕" + url);
             return reponse;
         }
 
@@ -528,8 +574,8 @@ namespace NetModel.NetMgr.Http
             return (Encoding.UTF8.GetString(listGet.ToArray()));            
         }
     }
-
     
 
     public delegate void NetErrorHandle(string url, string errorMsg);
+    public delegate void GetNetSpeed(string url, int bCount);
 }

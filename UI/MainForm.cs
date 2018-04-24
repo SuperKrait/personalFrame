@@ -182,6 +182,15 @@ namespace UI
         {
             startBtn.Enabled = true;
             scanBtn.Enabled = true;
+            compressBtn.Enabled = true;
+            uploadBtn.Enabled = true;
+        }
+        private void DisableBtn(object obj)
+        {
+            startBtn.Enabled = false;
+            scanBtn.Enabled = false;
+            compressBtn.Enabled = false;
+            uploadBtn.Enabled = false;
         }
 
         private void scanBtn_Click(object sender, EventArgs e)
@@ -201,13 +210,53 @@ namespace UI
             }
             else
             {
-                startBtn.Enabled = false;
-                scanBtn.Enabled = false;
-                if (Main.Instance.GeneratePanoData(dirTbx.Text))
+                bool isGetThumbnail = false;
+                int width = 0;
+                int height = 0;
+                if (!string.IsNullOrEmpty(widthTbx.Text) && !string.IsNullOrEmpty(heightTbx.Text))
                 {
-                    Main.Instance.UploadFile();
+                    try
+                    {
+                        width = int.Parse(widthTbx.Text);
+                        height = int.Parse(heightTbx.Text);
+                        isGetThumbnail = true;
+                    }
+                    catch (System.ArgumentNullException exception)
+                    {
+                        EventSystemMgr.SentEvent(EventSystemConst.OpenPanel_ErrorPanel, "请输入正确的宽高值，或者清空宽高值，使用默认宽高比");
+                        return;
+                    }
+                    catch (System.FormatException exception)
+                    {
+                        EventSystemMgr.SentEvent(EventSystemConst.OpenPanel_ErrorPanel, "请输入正确的宽高值，或者清空宽高值，使用默认宽高比");
+                        return;
+                    }
+                    catch (System.OverflowException exception)
+                    {
+                        EventSystemMgr.SentEvent(EventSystemConst.OpenPanel_ErrorPanel, "请输入正确的宽高值，或者清空宽高值，使用默认宽高比");
+                        return;
+                    }
                 }
+
+                DisableBtn(null);
+
+                Main.Instance.GeneratePanoData(dirTbx.Text, isGetThumbnail, width, height);
+                //{
+                //    //Main.Instance();
+                //}
             }
+        }
+
+        private void compressBtn_Click(object sender, EventArgs e)
+        {
+            DisableBtn(null);
+            Main.Instance.CompressByZIP();
+        }
+
+        private void uploadBtn_Click(object sender, EventArgs e)
+        {
+            DisableBtn(null);
+            Main.Instance.UploadZip();
         }
     }
 }

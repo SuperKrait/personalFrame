@@ -58,7 +58,9 @@ namespace LogicModel.Excel
             if (keyMap.ContainsKey(key))
             {
                 CustomCell cell = keyMap[key];
+                excel.SetCellFormat(cell, "@");
                 excel.SetCellValue(cell, customValue);
+                
                 cell.Row++;
             }
         }

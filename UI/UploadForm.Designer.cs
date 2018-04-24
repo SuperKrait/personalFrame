@@ -32,6 +32,7 @@
             this.progressBarTotol = new System.Windows.Forms.ProgressBar();
             this.uploadProgressLab = new System.Windows.Forms.Label();
             this.progressLable = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // TestTBX
@@ -67,12 +68,23 @@
             this.progressLable.TabIndex = 3;
             this.progressLable.Text = "0%";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(136, 227);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 4;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // UploadForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(476, 97);
+            this.ClientSize = new System.Drawing.Size(476, 110);
             this.ControlBox = false;
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.progressLable);
             this.Controls.Add(this.uploadProgressLab);
             this.Controls.Add(this.progressBarTotol);
@@ -93,5 +105,6 @@
         private System.Windows.Forms.ProgressBar progressBarTotol;
         private System.Windows.Forms.Label uploadProgressLab;
         private System.Windows.Forms.Label progressLable;
+        private System.Windows.Forms.Button button1;
     }
 }

@@ -166,7 +166,7 @@ namespace ExcelModel
             return _wsh.Cells[cell.Row, cell.Column];
         }
         /// <summary>
-        /// 设置单元格格式
+        /// 设置单元格公式
         /// </summary>
         /// <param name="_wsh"></param>
         /// <param name="cell"></param>
@@ -174,6 +174,17 @@ namespace ExcelModel
         public static void SetCellFunction(_Worksheet _wsh, CustomCell cell, string functionContent)
         {
             _wsh.Cells[cell.Row, cell.Column] = functionContent;//"=Sum(A1/B1)";
+        }
+
+        /// <summary>
+        /// 设置单元格公式
+        /// </summary>
+        /// <param name="_wsh"></param>
+        /// <param name="cell"></param>
+        /// <param name="cellFormat">公式 例如："@"代表文本格式,"，"G/通用格式"代表通用格式</param>
+        public static void SetCellFormat(_Worksheet _wsh, CustomCell cell, string cellFormat)
+        {
+            _wsh.Cells[cell.Row, cell.Column].NumberFormatLocal = cellFormat;
         }
         /// <summary>
         /// 设置行高

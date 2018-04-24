@@ -1,0 +1,4 @@
+F:\CSharp_Projects\WinFormBase\Bin\ZipModel.dll
+F:\CSharp_Projects\WinFormBase\Bin\ZipModel.pdb
+F:\CSharp_Projects\WinFormBase\ZipModel\obj\Debug\ZipModel.dll
+F:\CSharp_Projects\WinFormBase\ZipModel\obj\Debug\ZipModel.pdb

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Common.ThreadPool;
 
 namespace UI
 {
@@ -194,8 +195,12 @@ namespace UI
                 uiDic.Clear();
             }
         }
+
         #endregion
 
-        
+        private void button1_Click(object sender, EventArgs e)
+        {            
+            ShowTestTxt(ThreadPoolMgrSimple.GetAliveCount());
+        }
     }
 }

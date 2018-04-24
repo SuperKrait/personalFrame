@@ -85,6 +85,16 @@ namespace Common.ThreadPool
         {
             return PoolMgr.GetIdleCount();
         }
+
+        /// <summary>
+        /// 获取正在执行的线程池中线程数量
+        /// </summary>
+        /// <returns></returns>
+        public static int GetAliveCount()
+        {
+            return PoolMgr.GetAliveCount();
+        }
+
         /// <summary>
         /// 获取已销毁的线程id列表
         /// </summary>

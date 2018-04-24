@@ -1,0 +1,7 @@
+F:\CSharp_Projects\WinFormBase\PictureModel\bin\Debug\PictureModel.dll
+F:\CSharp_Projects\WinFormBase\PictureModel\bin\Debug\PictureModel.pdb
+F:\CSharp_Projects\WinFormBase\PictureModel\obj\Debug\PictureModel.csprojResolveAssemblyReference.cache
+F:\CSharp_Projects\WinFormBase\PictureModel\obj\Debug\PictureModel.dll
+F:\CSharp_Projects\WinFormBase\PictureModel\obj\Debug\PictureModel.pdb
+F:\CSharp_Projects\WinFormBase\Bin\PictureModel.dll
+F:\CSharp_Projects\WinFormBase\Bin\PictureModel.pdb

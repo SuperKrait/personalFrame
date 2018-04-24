@@ -1,0 +1,8 @@
+F:\CSharp_Projects\WinFormBase\ZipModel\bin\Release\ZipModel.dll
+F:\CSharp_Projects\WinFormBase\ZipModel\bin\Release\ZipModel.pdb
+F:\CSharp_Projects\WinFormBase\ZipModel\bin\Release\ICSharpCode.SharpZipLib.dll
+F:\CSharp_Projects\WinFormBase\ZipModel\obj\Release\ZipModel.csprojResolveAssemblyReference.cache
+F:\CSharp_Projects\WinFormBase\ZipModel\obj\Release\ZipModel.dll
+F:\CSharp_Projects\WinFormBase\ZipModel\obj\Release\ZipModel.pdb
+F:\CSharp_Projects\WinFormBase\Release\ZipModel.dll
+F:\CSharp_Projects\WinFormBase\Release\ZipModel.pdb

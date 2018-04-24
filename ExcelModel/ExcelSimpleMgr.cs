@@ -279,6 +279,16 @@ namespace ExcelModel
             ExcelIOHelper.QuitExcel(app, wbks, _wbk);
         }
 
+        /// <summary>
+        /// 设置单元格格式
+        /// </summary>
+        /// <param name="cell">单元格</param>
+        /// <param name="format">公式 例如："@"代表文本格式,"，"G/通用格式"代表通用格式</param>
+        public void SetCellFormat(CustomCell cell, string format)
+        {
+            ExcelIOHelper.SetCellFormat(workSheet, cell, format);
+        }
+
 
         public void Dispose()
         {

@@ -1,0 +1,6 @@
+F:\CSharp_Projects\WinFormBase\PictureModel\bin\Release\PictureModel.dll
+F:\CSharp_Projects\WinFormBase\PictureModel\bin\Release\PictureModel.pdb
+F:\CSharp_Projects\WinFormBase\PictureModel\obj\Release\PictureModel.dll
+F:\CSharp_Projects\WinFormBase\PictureModel\obj\Release\PictureModel.pdb
+F:\CSharp_Projects\WinFormBase\Release\PictureModel.dll
+F:\CSharp_Projects\WinFormBase\Release\PictureModel.pdb

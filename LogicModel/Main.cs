@@ -14,6 +14,9 @@ using LogicModel.Net;
 using LitJson;
 using System.Threading;
 using Common.EventMgr;
+using LocolFileModel.CustomFileModel;
+using System.Diagnostics;
+using ZipModel;
 
 namespace LogicModel
 {
@@ -54,7 +57,7 @@ namespace LogicModel
 
         #region 数据相关
 
-        public bool GeneratePanoData(string dirPath)
+        public bool GeneratePanoData(string dirPath, bool isGetThumbnailTex = false, int width = 0, int height = 0)
         {
             UIHelper.ShowUploadUI();
             EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 0);
@@ -62,10 +65,10 @@ namespace LogicModel
             try
             {
                 DataCenter.initAll(dirPath);
-                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 10);
+                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 30);
                 EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "Excel表生成中...，如有提示覆盖，请点击确认");
                 GenExcel();
-                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 20);
+                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 60);
                 EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "资源提取中...");
                 CreateSourceDir();
                 
@@ -76,23 +79,25 @@ namespace LogicModel
                 if (!string.IsNullOrEmpty(error))
                     SetErrorMsg(error);
                 else
-                    SetErrorMsg(e.ToString());
+                    SetErrorMsg("请重新点击开始\r\n" + e.ToString());
                 return false;                
             }
 
-            string errorCode = MoveSource();
+            string errorCode = MoveSource(isGetThumbnailTex, width, height);
             if (string.IsNullOrEmpty(errorCode))
             {
-                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 30);
-                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "资源准备完毕准备上传...");
-                Thread.Sleep(1000);
-                return true;
+                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 100);
+                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "资源准备完毕准备，请选择是否压缩上传...");                
             }
             else
             {
                 SetErrorMsg(errorCode);
                 return false;
             }
+            Thread.Sleep(2000);
+            UIHelper.CloseUploadUI();
+            EventSystemMgr.SentEvent(EventSystemConst.MainBtnEnable);
+            return true;
 
         }
 
@@ -106,10 +111,12 @@ namespace LogicModel
             return DataCenter.GetProductDic()[productId];
         }
 
+        private string tmpRootDir = "Data";
         private  string tmpTexDirPath = "TmpPano";
         private  string tmpSceneDirPath = "TmpScene";
         private  string tmpProductDirPath = "TmpProduct";
         private  string excelPath = System.Environment.CurrentDirectory + "\\tmpExcel.xlsx";
+        private string zipPath = "Data.zip";
 
         public  void GenExcel()
         {
@@ -152,7 +159,7 @@ namespace LogicModel
                 //excel.WriteKey("商品标签6", "13");
                 excel.WriteKey("商品金额", "0/件");
                 excel.WriteKey("商品使用数量", "1");
-                excel.WriteKey("商品说明", Encoding.Default.GetString(File.ReadAllBytes(product.ProductContentPath)));
+                excel.WriteKey("商品说明", Encoding.UTF8.GetString(File.ReadAllBytes(product.ProductContentPath)));
 
             }
             excel.QuitExcel();           
@@ -161,24 +168,49 @@ namespace LogicModel
 
         public  void CreateSourceDir()
         {
+            //UIHelper.ShowUploadUI();
             if (Directory.Exists(tmpTexDirPath))
             {
-                Directory.Delete(tmpTexDirPath, true);
+                Debug.Print("删除文件夹" + tmpTexDirPath);
+                DeleteDir(tmpTexDirPath);                
             }
             if (Directory.Exists(tmpSceneDirPath))
             {
-                Directory.Delete(tmpSceneDirPath, true);
+                Debug.Print("删除文件夹" + tmpSceneDirPath);
+                DeleteDir(tmpSceneDirPath);
             }
             if (Directory.Exists(tmpProductDirPath))
             {
-                Directory.Delete(tmpProductDirPath, true);
+                Debug.Print("删除文件夹" + tmpProductDirPath);
+                DeleteDir(tmpProductDirPath);
             }
+            Debug.Print("创建文件夹" + tmpTexDirPath);
             Directory.CreateDirectory(tmpTexDirPath);
+            Debug.Print("创建文件夹" + tmpSceneDirPath);
             Directory.CreateDirectory(tmpSceneDirPath);
+            Debug.Print("创建文件夹" + tmpProductDirPath);
             Directory.CreateDirectory(tmpProductDirPath);
+            Debug.Print("创建文件夹完毕" );
+
+
         }
 
-        public  string MoveSource()
+        private void DeleteDir(string path)
+        {
+            string[] files = Directory.GetFiles(path);
+            for (int i = 0; i < files.Length; i++)
+            {
+                File.Delete(files[i]);
+            }
+            string[] dir = Directory.GetDirectories(path);
+            for (int i = 0; i < dir.Length; i++)
+            {
+                DeleteDir(dir[i]);
+                Directory.Delete(dir[i]);
+            }
+        }
+
+        public  string MoveSource(bool isGetThumbnailTex, int width, int height)
         {
             foreach (var pairs in DataCenter.GetSceneDic())
             {
@@ -186,8 +218,30 @@ namespace LogicModel
                 {
                     return "场景名称--->" + pairs.Value.Name + "<---缩略图找不到";
                 }
-                File.Copy(pairs.Value.ThumbnailPath, tmpSceneDirPath + "\\" + pairs.Value.Name + DataCenter.GetFileDic()[pairs.Value.ThumbnailPath].ExName, true);
-                pairs.Value.ThumbnailPath = tmpSceneDirPath + "\\" + pairs.Value.Name + DataCenter.GetFileDic()[pairs.Value.ThumbnailPath].ExName;
+                CustomFileInfo customFileInfo = DataCenter.GetFileDic()[pairs.Value.ThumbnailPath];
+                string newPath = tmpSceneDirPath + "\\" + pairs.Value.Name + customFileInfo.ExName;
+
+
+                if (isGetThumbnailTex)
+                {
+                    System.Drawing.Image image = PictureModel.PictureHelper.GetImage(File.ReadAllBytes(pairs.Value.ThumbnailPath));
+                    if (image.Width <= width && image.Height <= height)
+                    {
+                        File.Copy(pairs.Value.ThumbnailPath, newPath, true);
+                        pairs.Value.ThumbnailPath = newPath;
+                    }
+                    else
+                    {
+                        image = PictureModel.PictureHelper.GetThumbnail(image, width, height);
+                        byte[] data = PictureModel.PictureHelper.GetBytes(image, customFileInfo.ExName);
+                        FileMgrSimple.WriteFile(FileType.Texture, newPath, data);
+                    }
+                }
+                else
+                {
+                    File.Copy(pairs.Value.ThumbnailPath, newPath, true);
+                    pairs.Value.ThumbnailPath = newPath;
+                }
             }
 
             foreach (var pairs in DataCenter.GetProductDic())
@@ -196,8 +250,31 @@ namespace LogicModel
                 {
                     return "产品名称名称--->" + pairs.Value.Name + "<---缩略图找不到";
                 }
-                File.Copy(pairs.Value.ThumbnailPath, tmpProductDirPath + "\\" + pairs.Value.Name + DataCenter.GetFileDic()[pairs.Value.ThumbnailPath].ExName, true);
-                pairs.Value.ThumbnailPath = tmpProductDirPath + "\\" + pairs.Value.Name + DataCenter.GetFileDic()[pairs.Value.ThumbnailPath].ExName;
+
+
+                CustomFileInfo customFileInfo = DataCenter.GetFileDic()[pairs.Value.ThumbnailPath];
+                string newPath = tmpProductDirPath + "\\" + pairs.Value.Name + customFileInfo.ExName;
+
+                if (isGetThumbnailTex)
+                {
+                    System.Drawing.Image image = PictureModel.PictureHelper.GetImage(File.ReadAllBytes(pairs.Value.ThumbnailPath));
+                    if (image.Width <= width && image.Height <= height)
+                    {
+                        File.Copy(pairs.Value.ThumbnailPath, newPath, true);
+                        pairs.Value.ThumbnailPath = newPath;
+                    }
+                    else
+                    {
+                        image = PictureModel.PictureHelper.GetThumbnail(image, width, height);
+                        byte[] data = PictureModel.PictureHelper.GetBytes(image, customFileInfo.ExName);
+                        FileMgrSimple.WriteFile(FileType.Texture, newPath, data);
+                    }
+                }
+                else
+                {
+                    File.Copy(pairs.Value.ThumbnailPath, newPath, true);
+                    pairs.Value.ThumbnailPath = newPath;
+                }
             }
 
             foreach (var pairs in DataCenter.GetPanoDic())
@@ -206,8 +283,23 @@ namespace LogicModel
                 {
                     return "产品名称名称--->" + pairs.Value.Name + "<---图找不到";
                 }
-                File.Copy(pairs.Value.PanoTexturePath, tmpTexDirPath + "\\" + pairs.Value.Name + ".jpg"/*DataCenter.GetFileDic()[pairs.Value.PanoTexturePath].ExName*/, true);
-                pairs.Value.PanoTexturePath = tmpTexDirPath + "\\" + pairs.Value.Name + ".jpg";
+                
+
+                CustomFileInfo customFileInfo = DataCenter.GetFileDic()[pairs.Value.PanoTexturePath];
+                string newPath = tmpTexDirPath + "\\" + pairs.Value.Name + ".jpg";
+
+                //if (isGetThumbnailTex)
+                //{
+                //    System.Drawing.Image image = PictureModel.PictureHelper.GetImage(File.ReadAllBytes(pairs.Value.PanoTexturePath));
+                //    image = PictureModel.PictureHelper.GetThumbnail(image, width, height);
+                //    byte[] data = PictureModel.PictureHelper.GetBytes(image, ".jpg");
+                //    FileMgrSimple.WriteFile(FileType.Texture, newPath, data);
+                //}
+                //else
+                //{
+                File.Copy(pairs.Value.PanoTexturePath, newPath, true);
+                pairs.Value.PanoTexturePath = newPath;
+                //}
             }
             return string.Empty;
         }
@@ -236,7 +328,7 @@ namespace LogicModel
                     }
                     else
                     {
-                        SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
+                        SetErrorMsg("网络不太好，请检查该Url能打开，并且最好重启本工具" + "url= " + url + "\r\n" + "msg= " + msg);
                     }
                 }
             );
@@ -281,15 +373,95 @@ namespace LogicModel
                         SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
                         EventSystemMgr.SentEvent(EventSystemConst.LoginFailed);
                     }
-                }
+                },
+                new SetUploadSpeedHandle(GetUploadSpeed)
                 );
         }
 
+        public void UploadZip()
+        {
+            UIHelper.ShowUploadUI();
+            EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 30);
+            EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "资源正在上传，请耐心等待...");
+
+            Dictionary<string, string> keyValueDic = new Dictionary<string, string>();
+            List<KeyValuePair<string, string>> fileList = new List<KeyValuePair<string, string>>();
+
+            KeyValuePair<string, string> item = new KeyValuePair<string, string>("file", "application/x-zip-compressed|" + zipPath);
+
+            fileList.Add(item);
+
+            httpHelper.SendByForm(serverIp + @"excleupload/readExcle", sessionId,
+                keyValueDic, fileList,
+                delegate (NetEnum code, string url, string msg)
+                {
+                    //Debug.Print("============收到消息1===============" + System.DateTime.Now);
+                    if (code == NetEnum.SUCCEED)
+                    {
+                        if (msg[0] == '{')
+                        {
+                            JsonData json = JsonMapper.ToObject(msg);
+                            if ((bool)json["success"])
+                            {
+                                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 100);
+                                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "资源上传成功...");
+                                Thread.Sleep(2000);
+                                EventSystemMgr.SentEvent(EventSystemConst.MainBtnEnable);
+                                UIHelper.CloseUploadUI();
+                            }
+                            else
+                            {
+
+                                string errorMsg = json["msg"].ToString();
+                                SetErrorMsg("url= " + url + "\r\n" + "msg= " + errorMsg);
+                                //httpHelper.GetErrorFile(serverIp + @"excleupload/dowloaderror", sessionId,
+                                //delegate (NetEnum tmpCode, string errorUrl, string Msg)
+                                //{
+                                //    if (code == NetEnum.SUCCEED)
+                                //    {
+                                //        SetErrorMsg("生成的Excel有问题，请检查每一个生成的资源文件夹，以及Excel表,报错的error.xls已经下载完毕\r\n" + errorMsg);
+                                //    }
+                                //    else
+                                //    {
+                                //        SetErrorMsg("生成的Excel有问题，请检查每一个生成的资源文件夹，以及Excel表\r\n" + Msg);
+
+                                //        //isSucceed = false;
+                                //        //threadSwitch.Set();
+                                //        //SetErrorMsg("服务器访问出错，请重新上传，若还失败，请重新启动本工具!" + "url= " + url + "\r\n" + "msg= " + msg);
+                                //    }
+
+                                //}, @"error.xls");
+                            }
+                        }
+                        else
+                        {
+                            SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
+                        }
+                    }
+                    else
+                    {
+                        SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
+                    }
+                    
+
+                },
+                new SetUploadSpeedHandle(GetUploadSpeed)
+                );
+            
+        }
+
+
+        /*关闭之前的上传逻辑
+         * 2018/04/20
+         * 
+         * 
         /// <summary>
         /// 上传数据
         /// </summary>
         public  void UploadFile()
-        {            
+        {
+            StartLogUpSpeed();
+            Debug.Print("开始获取速度成功!");
             System.Threading.ManualResetEvent threadSwitch = new System.Threading.ManualResetEvent(false);
             bool isSucceed = true;
 
@@ -302,15 +474,15 @@ namespace LogicModel
             httpHelper.SendByGet(serverIp + @"excleupload/", sessionId,
                 delegate (NetEnum code, string url, string msg)
                 {
-                    threadSwitch.Set();
                     if (code == NetEnum.SUCCEED)
                     {
-
+                        threadSwitch.Set();
                     }
                     else
                     {
                         isSucceed = false;
-                        SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
+                        threadSwitch.Set();
+                        SetErrorMsg("服务器访问出错，请重新上传，若还失败，请重新启动本工具!" + "url= " + url + "\r\n" + "msg= " + msg);
                     }
 
                 });
@@ -376,84 +548,143 @@ namespace LogicModel
                 keyDic, fileList,
                 delegate (NetEnum code, string url, string msg)
                 {
+                    //Debug.Print("============收到消息1===============" + System.DateTime.Now);
                     if (code == NetEnum.SUCCEED)
                     {
                         JsonData json = JsonMapper.ToObject(msg);
                         if ((bool)json["success"])
                         {
-
+                            threadSwitch.Set();
                         }
                         else
                         {
                             isSucceed = false;
+                            threadSwitch.Set();
                             string errorMsg = json["msg"].ToString();
-                            SetErrorMsg(errorMsg);
+
+                            httpHelper.GetErrorFile(serverIp + @"excleupload/dowloaderror", sessionId,
+                            delegate (NetEnum tmpCode, string errorUrl, string Msg)
+                            {
+                                if (code == NetEnum.SUCCEED)
+                                {
+                                    SetErrorMsg("生成的Excel有问题，请检查每一个生成的资源文件夹，以及Excel表,报错的error.xls已经下载完毕\r\n" + errorMsg);
+                                }
+                                else
+                                {
+                                    SetErrorMsg("生成的Excel有问题，请检查每一个生成的资源文件夹，以及Excel表\r\n" + Msg);
+
+                                    //isSucceed = false;
+                                    //threadSwitch.Set();
+                                    //SetErrorMsg("服务器访问出错，请重新上传，若还失败，请重新启动本工具!" + "url= " + url + "\r\n" + "msg= " + msg);
+                                }
+
+                            }, @"error.xls");
                         }
-                        threadSwitch.Set();
                     }
                     else
                     {
                         isSucceed = false;
+                        threadSwitch.Set();
                         SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
                     }
-                });
+                    
+
+                },
+                new SetUploadSpeedHandle(GetUploadSpeed)
+                );
+            //Debug.Print("============收到消息2===============" + System.DateTime.Now);
             threadSwitch.WaitOne();
             //失败返回
             if (!isSucceed)
                 return;
             threadSwitch.Reset();
             #endregion
-
+            //Debug.Print("============收到消息3===============" + System.DateTime.Now);
             EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 40);
             EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "excel验证成功，正在上传全景图，可能时间比较久，请耐心等待...");
-
+            //Debug.Print("============收到消息4===============" + System.DateTime.Now);
             #region 上传全景图
             object countLock = new object();
             int totolCount = panoInfo.Count;
+            int errorCount = 0;
             for (int i = 0; i < panoInfo.Count; i++)
             {
+
+                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, (40 + i * 100 / totolCount / 4));
+                if(errorCount == 0)
+                    EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, string.Format("正在上传全景图:{0}，请耐心等待...", panoInfo[i].Name));
+                else
+                    EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, string.Format("上传全景图:{0}失败，正在第{1}次重试，请耐心等待...", panoInfo[i].Name, errorCount));
                 fileList = new List<KeyValuePair<string, string>>();
                 fileList.Add(new KeyValuePair<string, string>("file", "image/jpeg|" + panoInfo[i].PanoTexturePath));
 
                 keyDic = new Dictionary<string, string>();
                 keyDic.Add("type", panoInfo[i].PanoType);
 
+                int indexJ = i;
+
                 httpHelper.SendByForm(serverIp + @"excleupload/panoramaAdd", sessionId,
                 keyDic, fileList,
                 delegate (NetEnum code, string url, string msg)
                 {
-                    lock (countLock)
-                    {
-                        totolCount--;
-                    }
-                    if (totolCount <= 0)
-                    {
-                        threadSwitch.Set();
-                    }
-                    if (code == NetEnum.SUCCEED)
-                   {                        
-                        JsonData json = JsonMapper.ToObject(msg);
-                       if ((bool)json["success"])
-                       {
-                           
-                       }
-                       else
-                       {
-                            //isSucceed = false;
-                            SetWarning(json["msg"].ToString());
+                   if (code == NetEnum.SUCCEED)
+                   {
+                        try
+                        {
+                            errorCount = 0;
+                            JsonData json = JsonMapper.ToObject(msg);
+                            if ((bool)json["success"])
+                            {
+                                //EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, string.Format("上传全景图:{0}成功！", panoInfo[indexJ].Name));
+                                threadSwitch.Set();
+                            }
+                            else
+                            {
+                                threadSwitch.Set();
+                                //isSucceed = false;
+                                //isSucceed = false;
+                                //threadSwitch.Set();
+                                SetWarning("上传全景图失败   url= " + url + "\r\n" + "msg= " + msg);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.Print("上传全景图返回有误+++++++++++++++++++++++++++++++++" + msg);
+                            threadSwitch.Set();
                         }
                         
                     }
                    else
                    {
-                       isSucceed = false;
-                       SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
-                   }
-                });
-                
+                        if (errorCount < 3)
+                        {
+                            threadSwitch.Set();
+                            i--;
+                            errorCount++;
+                        }
+                        else
+                        {
+                            isSucceed = false;
+                            threadSwitch.Set();
+                            SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
+                        }
+                   }                 
+
+                },
+                new SetUploadSpeedHandle(GetUploadSpeed));
+                //Debug.Print("============收到消息i===============" + System.DateTime.Now + "=========" + i);
+
+
+                threadSwitch.WaitOne();
+                if (!isSucceed)
+                    return;
+                threadSwitch.Reset();
+
             }
-            threadSwitch.WaitOne();
-            if (!isSucceed)
+
+            //Debug.Print("============收到消息over===============" + System.DateTime.Now);
+            //threadSwitch.WaitOne();
+            //if (!isSucceed)
                 return;
             #endregion
 
@@ -461,7 +692,7 @@ namespace LogicModel
             EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "全景图上传完毕，正在上传商品图，请耐心等待...");
 
             #region 上传产品图
-            threadSwitch.Reset();
+            //threadSwitch.Reset();
 
             fileList = new List<KeyValuePair<string, string>>();
 
@@ -485,39 +716,67 @@ namespace LogicModel
                 fileList.Add(new KeyValuePair<string, string>("productionfile", contentType + productInfo[i].ThumbnailPath));
             }
             threadSwitch.Reset();
-            httpHelper.SendByForm(serverIp + @"excleupload/productAdd", sessionId, null, fileList,
-                delegate (NetEnum code, string url, string msg)
-                {
-                    if (code == NetEnum.SUCCEED)
-                    {                       
-                        JsonData json = JsonMapper.ToObject(msg);
-                        if ((bool)json["success"])
+            for (int i = 0; i < 1; i++)
+            {
+                if(errorCount > 0)
+                    EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, string.Format("商品图上传失败，正在第{0}次重试，请耐心等待...", errorCount));
+                httpHelper.SendByForm(serverIp + @"excleupload/productAdd", sessionId, null, fileList,
+                    delegate (NetEnum code, string url, string msg)
+                    {
+                        if (code == NetEnum.SUCCEED)
                         {
-                            
+                            try
+                            {
+                                JsonData json = JsonMapper.ToObject(msg);
+                                if ((bool)json["success"])
+                                {
+                                    errorCount = 0;
+                                    threadSwitch.Set();
+                                }
+                                else
+                                {
+                                    //isSucceed = false;
+                                    errorCount = 3;
+                                    SetWarning("商品上传失败  url= " + url + "\r\n" + "msg= " + msg);
+                                    threadSwitch.Set();
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.Print("商品图上传成功个，但是返回有误+++++++++++++++++++" + msg);
+                                threadSwitch.Set();
+                            }
                         }
                         else
                         {
-                            //isSucceed = false;
-                            SetWarning(json["msg"].ToString());
+                            if (errorCount < 3)
+                            {
+                                i--;
+                                errorCount++;
+                            }
+                            {
+                                isSucceed = false;
+                                threadSwitch.Set();
+                                SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
+                            }
                         }
-                        threadSwitch.Set();
-                    }
-                    else
-                    {
-                        isSucceed = false;
-                        SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
-                    }
-                });
-            threadSwitch.WaitOne();
+                        
+
+                    },
+                    new SetUploadSpeedHandle(GetUploadSpeed)
+                    );
+                threadSwitch.WaitOne();
+                threadSwitch.Reset();
+            }
 
             if (!isSucceed)
                 return;
             #endregion
 
             EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 80);
-            EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "全景图上传完毕，正在上传封面图，再耐心点就快好了...");
+            EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "商品图上传完毕，正在上传封面图，再耐心点就快好了...");
             #region 上传场景
-            threadSwitch.Reset();
+            
             fileList = new List<KeyValuePair<string, string>>();
 
             for (int i = 0; i < sceneInfo.Count; i++)
@@ -540,32 +799,57 @@ namespace LogicModel
                 fileList.Add(new KeyValuePair<string, string>("scenefile", contentType + sceneInfo[i].ThumbnailPath));
             }
 
-            
-            httpHelper.SendByForm(serverIp + @"excleupload/sceneAdd", sessionId, null, fileList,
-                delegate (NetEnum code, string url, string msg)
-                {
-                    if (code == NetEnum.SUCCEED)
+            for (int i = 0; i < 1; i++)
+            {
+                if (errorCount > 0)
+                    EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, string.Format("封面图上传失败，正在第{0}次重试，请耐心等待...", errorCount));
+                httpHelper.SendByForm(serverIp + @"excleupload/sceneAdd", sessionId, null, fileList,
+                    delegate (NetEnum code, string url, string msg)
                     {
-                        JsonData json = JsonMapper.ToObject(msg);
-                        if ((bool)json["success"])
+                        if (code == NetEnum.SUCCEED)
                         {
+                            try
+                            {
+                                JsonData json = JsonMapper.ToObject(msg);
+                                if ((bool)json["success"])
+                                {
+                                    errorCount = 0;
+                                    threadSwitch.Set();
+                                }
+                                else
+                                {
+                                    errorCount = 3;
+                                    SetWarning("场景上传出现问题，请检查数据资源是否有误!url= " + url + "\r\n" + "msg= " + msg);
+                                    threadSwitch.Set();
 
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.Print("上传场景图成功，但是返回有误++++++++++", msg);
+                                threadSwitch.Set();
+                            }
                         }
                         else
                         {
-                            //isSucceed = false;
-                            SetWarning(json["msg"].ToString());
+                            if (errorCount < 3)
+                            {
+                                errorCount++;
+                                i--;
+                            }
+                            isSucceed = false;
+                            threadSwitch.Set();
+                            SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
                         }
-                        threadSwitch.Set();
-                    }
-                    else
-                    {
-                        isSucceed = false;
-                        SetErrorMsg("url= " + url + "\r\n" + "msg= " + msg);
-                    }
-                });
+                        
 
-            threadSwitch.WaitOne();
+                    },
+                    new SetUploadSpeedHandle(GetUploadSpeed)
+                    );
+                threadSwitch.WaitOne();
+                threadSwitch.Reset();
+            }
+
 
             if (!isSucceed)
                 return;
@@ -591,12 +875,151 @@ namespace LogicModel
             #endregion
 
             EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 100);
-            EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "恭喜上传成功！");
+            if (isSucceed)
+                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "恭喜上传成功！");
+            else
+                EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "发布失败，请手动发布，或者重新上传，或者联系管理员！");
 
+            threadSwitch.Set();
+            EndLogUpSpeed();
+            Debug.Print("获取速度停止成功!");
             Thread.Sleep(2000);
             UIHelper.CloseUploadUI();
-
             EventSystemMgr.SentEvent(EventSystemConst.MainBtnEnable);
+
+        }
+        */
+
+
+        private object speedHandleLock = new object();
+        private DateTime lastTime = DateTime.Now;
+        /// <summary>
+        /// 获取上传速度
+        /// </summary>
+        private void GetUploadSpeed(string url, int speed)
+        {
+            lock (speedHandleLock)
+            {
+                lastTime = System.DateTime.Now;
+                Debug.Print(string.Format("当前url-->{0}上传速度为{1}B,时间是{2}", url, speed, lastTime.ToString()));
+            }
+        }
+        
+
+
+
+        #endregion
+
+        #region 压缩相关
+
+        /// <summary>
+        /// 压缩成数据包
+        /// </summary>
+        public void CompressByZIP()
+        {
+            UIHelper.ShowUploadUI();
+            EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 0);
+            EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "资源准备完毕准备，正在压缩请稍后...");
+            ThreadPoolMgrSimple.Start(
+                delegate ()
+                {
+
+                    if (!Directory.Exists(tmpTexDirPath))
+                    {
+                        SetErrorMsg("没有找到准备好的全景图文件夹 = " + tmpTexDirPath);
+                        return;
+                    }
+                    else if (!Directory.Exists(tmpSceneDirPath))
+                    {
+                        SetErrorMsg("没有找到准备好的封面图文件夹 = " + tmpSceneDirPath);
+                        return;
+                    }
+                    else if (!Directory.Exists(tmpProductDirPath))
+                    {
+                        SetErrorMsg("没有找到准备好的商品图文件夹 = " + tmpProductDirPath);
+                        return;
+                    }
+                    else if (!File.Exists(excelPath))
+                    {
+                        SetErrorMsg("没有找到准备好的excel = " + excelPath);
+                        return;
+                    }
+
+                    string excelFileName = excelPath.Substring(excelPath.LastIndexOf('\\') + 1);
+                    try
+                    {
+                        if (Directory.Exists(tmpRootDir))
+                        {
+                            Directory.Delete(tmpRootDir, true);
+                        }
+
+                        Directory.CreateDirectory(tmpRootDir);
+
+                        Directory.Move(tmpTexDirPath, tmpRootDir + "\\" + tmpTexDirPath);
+
+                        Directory.Move(tmpSceneDirPath, tmpRootDir + "\\" + tmpSceneDirPath);
+
+                        Directory.Move(tmpProductDirPath, tmpRootDir + "\\" + tmpProductDirPath);
+
+                        
+                        File.Move(excelPath, tmpRootDir + "\\" + excelFileName);
+
+                        EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 50);
+                        EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "图量较大，压缩时间可能比较久，请耐心等候...");
+
+                        if (File.Exists(zipPath))
+                        {
+                            File.Delete(zipPath);
+                        }
+
+                        if (!ZipModel.ZipHelper.ZipDirectory(tmpRootDir, zipPath, ""))
+                        {
+                            SetErrorMsg("添加压缩文件失败，请检查文件是否有缺失。");
+                        }
+                        else
+                        {
+                            EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 100);
+                            EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "恭喜压缩完毕成功!");
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        if (Directory.Exists(tmpRootDir + "\\" + tmpTexDirPath))
+                        {
+                            Directory.Move(tmpRootDir + "\\" + tmpTexDirPath, tmpTexDirPath);
+                        }
+
+                        if (Directory.Exists(tmpRootDir + "\\" + tmpSceneDirPath))
+                        {
+                            Directory.Move(tmpRootDir + "\\" + tmpSceneDirPath, tmpSceneDirPath);
+                        }
+
+                        if (Directory.Exists(tmpRootDir + "\\" + tmpProductDirPath))
+                        {
+                            Directory.Move(tmpRootDir + "\\" + tmpProductDirPath, tmpProductDirPath);
+                        }
+
+                        if (File.Exists(tmpRootDir + "\\" + excelFileName))
+                        {
+                            File.Move(tmpRootDir + "\\" + excelFileName, excelPath);
+                        }
+
+                        if (File.Exists(zipPath))
+                        {
+                            File.Delete(zipPath);
+                        }
+                        SetErrorMsg("文件操作出了问题，正在回退操作，请稍后" + e.ToString());
+
+                    }
+
+                    Thread.Sleep(2000);
+                    UIHelper.CloseUploadUI();
+                    EventSystemMgr.SentEvent(EventSystemConst.MainBtnEnable);
+                },
+                2, delegate (string msg)
+                {
+                    SetErrorMsg(msg);
+                });
 
         }
 

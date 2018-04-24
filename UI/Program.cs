@@ -27,7 +27,7 @@ namespace UI
             MainThreadMgr.Reset();
 
             Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            //Application.SetCompatibleTextRenderingDefault(false);
             loginPanel = new LoginForm();
             Application.Run(loginPanel);
 
@@ -133,7 +133,7 @@ namespace UI
         private static void OpenUploadPanel(string eId, params object[] objs)
         {
             Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            //Application.SetCompatibleTextRenderingDefault(false);
             upLoadPanel = new UploadForm();
             Application.Run(upLoadPanel);
         }
@@ -152,6 +152,7 @@ namespace UI
         {
             string msg = objs[0].ToString();
             MessageBox.Show(msg);
+            CloseUploadPanel(string.Empty);
         }
 
         #endregion

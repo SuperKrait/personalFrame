@@ -2,3 +2,4 @@ F:\CSharp_Projects\WinFormBase\Bin\NetModel.dll
 F:\CSharp_Projects\WinFormBase\Bin\NetModel.pdb
 F:\CSharp_Projects\WinFormBase\NetModel\obj\Debug\NetModel.dll
 F:\CSharp_Projects\WinFormBase\NetModel\obj\Debug\NetModel.pdb
+F:\CSharp_Projects\WinFormBase\NetModel\obj\Debug\NetModel.csprojResolveAssemblyReference.cache

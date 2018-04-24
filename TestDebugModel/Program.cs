@@ -34,46 +34,39 @@ namespace TestDebugModel
 
         static void Main(string[] args)
         {
-            //ExcelHelper excel = new ExcelHelper();
-
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    excel.WriteKey("场景类目", "1");
-            //    excel.WriteKey("场景名称", "2");
-            //    excel.WriteKey("场景标签1", "3");
-            //    excel.WriteKey("场景标签2", "4");
-            //    excel.WriteKey("场景标签3", "5");
-            //    excel.WriteKey("商品类目", "6");
-            //    excel.WriteKey("商品名称", "7");
-            //    excel.WriteKey("商品标签1", "8");
-            //    excel.WriteKey("商品标签2", "9");
-            //    excel.WriteKey("商品标签3", "10");
-            //    excel.WriteKey("商品标签4", "11");
-            //    excel.WriteKey("商品标签5", "12");
-            //    excel.WriteKey("商品标签6", "13");
-            //    excel.WriteKey("商品金额", "14");
-            //    excel.WriteKey("商品使用数量", "15");
-            //    excel.WriteKey("商品说明", "16");
-            //}
-            //excel.QuitExcel();
-
-            //LogicModel.Main.Init();
-            //LogicModel.Main.GeneratePanoData(@"F:\CSharp_Projects\WinFormBase\Bin\测试文件夹测试版");
-            //LogicModel.Main.GenExcel();
-            //LogicModel.Main.CreateSourceDir();
-            //LogicModel.Main.MoveSource();
-            //Console.WriteLine("测试服务器");
-            //LogicModel.Main.TestServerOpened();
-            //Thread.Sleep(5000);
-            //Console.WriteLine("登录");
-
-            //LogicModel.Main.Login("testcs", "111111");
-            //Thread.Sleep(5000);
-            //Console.WriteLine("上传");
-
-            //LogicModel.Main.UploadFile();
-            //LogicModel.Main.Destory();
+            //string path = @"E:\素材小样";
+            string path = @"E:\素材小样";
+            string[] dirs = Directory.GetDirectories(path);
+            for (int i = 0; i < dirs.Length; i++)
+            {
+                string[] tmpdirs = Directory.GetDirectories(dirs[i]);
+                for (int j = 0; j < tmpdirs.Length; j++)
+                {
+                    string addFont;
+                    if ((j + 1) < 10)
+                    {
+                        addFont = "0" + (j + 1);
+                    }
+                    else
+                        addFont = j.ToString();
+                    string nameFront = tmpdirs[j].Substring(0, tmpdirs[j].LastIndexOf('\\'));
+                    string nameMiddle = "\\" + nameFront.Substring(nameFront.LastIndexOf('\\') + 1, 2) +  addFont;
+                    string nameend = tmpdirs[j].Substring(tmpdirs[j].LastIndexOf('\\') + 3);
+                    try
+                    {
+                        Directory.Move(tmpdirs[j], nameFront + nameMiddle + nameend);
+                    }
+                    catch (Exception e)
+                    {
+                        //Console.WriteLine(e.ToString());
+                    }
+                    
+                }
+            }
+            Console.WriteLine("好了");
+            Console.ReadKey();
         }
+
 
         //static void Main(string[] args)
         //{
