@@ -109,7 +109,7 @@ namespace NetModel.NetMgr.Http
                 string[] arrList = fileList[i].Value.Split('|');
                 string contentType = arrList[0];
                 string fileName = arrList[1];
-                fileName = fileName.Substring(fileName.LastIndexOf('\\') + 1);
+                fileName = fileName.Substring(fileName.LastIndexOf('/') + 1);
                 item = string.Format(filePartHeader, fileList[i].Key, fileName, contentType);
                 data = Encoding.UTF8.GetBytes(item);
                 stream.Write(data, 0, data.Length);

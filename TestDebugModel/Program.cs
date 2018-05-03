@@ -49,9 +49,9 @@ namespace TestDebugModel
                     }
                     else
                         addFont = j.ToString();
-                    string nameFront = tmpdirs[j].Substring(0, tmpdirs[j].LastIndexOf('\\'));
-                    string nameMiddle = "\\" + nameFront.Substring(nameFront.LastIndexOf('\\') + 1, 2) +  addFont;
-                    string nameend = tmpdirs[j].Substring(tmpdirs[j].LastIndexOf('\\') + 3);
+                    string nameFront = tmpdirs[j].Substring(0, tmpdirs[j].LastIndexOf('/'));
+                    string nameMiddle = "/" + nameFront.Substring(nameFront.LastIndexOf('/') + 1, 2) +  addFont;
+                    string nameend = tmpdirs[j].Substring(tmpdirs[j].LastIndexOf('/') + 3);
                     try
                     {
                         Directory.Move(tmpdirs[j], nameFront + nameMiddle + nameend);

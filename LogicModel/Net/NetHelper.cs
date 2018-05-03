@@ -188,7 +188,7 @@ namespace LogicModel.Net
             {
                 Dictionary<HttpRequestHeader, string> headers = DefaultHeadersClone;
                 Dictionary<string, string> customHeader = HeaderCustomClone;
-                headers.Add(HttpRequestHeader.Cookie, sessionId);
+                //headers.Add(HttpRequestHeader.Cookie, sessionId);
 
                 FormData data = new FormData();
 
@@ -282,7 +282,7 @@ namespace LogicModel.Net
             SendRequest(url, callBack, delegate ()
             {
                 Dictionary<HttpRequestHeader, string> headers = DefaultHeadersClone;
-                headers.Add(HttpRequestHeader.Cookie, sessionId);
+                //headers.Add(HttpRequestHeader.Cookie, sessionId);
                 Dictionary<string, string> customHeader = HeaderCustomClone;
                 HttpWebResponse reponseGet = null;
                 reponseGet = HttpHelper.CreatePostHttpResponse(url, null, 10000, headers, customHeader, null, null, delegate (string errorUrl, string msg)
@@ -341,7 +341,7 @@ namespace LogicModel.Net
             SendRequest(url, callBack, delegate ()
             {
                 Dictionary<HttpRequestHeader, string> headers = DefaultHeadersClone;
-                headers.Add(HttpRequestHeader.Cookie, sessionId);
+                //headers.Add(HttpRequestHeader.Cookie, sessionId);
                 Dictionary<string, string> customHeader = HeaderCustomClone;
                 HttpWebResponse reponseGet = null;
                 reponseGet = HttpHelper.CreatePostHttpResponse(url, null, 300000, headers, customHeader, null, null, delegate (string errorUrl, string msg)

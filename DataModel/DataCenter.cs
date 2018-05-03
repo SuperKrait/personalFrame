@@ -94,9 +94,14 @@ namespace DataModel
         private static void FindScene(string allSceneDir)
         {
             //设置报错路径
-            errorPath = "FindScene" + allSceneDir;
+            errorPath = "找不到该路径:" + "FindScene" + allSceneDir;
 
             string[] scenesDir = Directory.GetDirectories(allSceneDir);
+            if (scenesDir.Length == 0)
+            {
+                errorPath = string.Format("{0}路径没有场景,请检查数据是否存在问题", allSceneDir);
+                throw new Exception();
+            }
             for (int i = 0; i < scenesDir.Length; i++)
             {
                 CustomDirectoryInfo dirItem;// = dirDic[scenesDir[i]];
@@ -106,7 +111,7 @@ namespace DataModel
                     throw new Exception("未检查到相关key值");
                 }
                 //设置报错路径
-                errorPath = dirItem.FullPath;
+                errorPath = dirItem.FullPath + "路径出现问题，请检查资源是否存在，以及命名是否规范";
 
                 //去除中间的多余的横线造成的空字数据
                 string[] sceneAtt = dirItem.everyPathArr[dirItem.everyPathArr.Length - 1].Split('-');
@@ -137,6 +142,7 @@ namespace DataModel
 
                 //文件名列表,查找缩略图
                 string[] filesPath = Directory.GetFiles(dirItem.FullPath);
+                bool isFindSceneThumb = false;
                 for (int j = 0; j < filesPath.Length; j++)
                 {
                     CustomFileInfo fileInfo;
@@ -145,9 +151,15 @@ namespace DataModel
                         if (fileInfo.ExName == ".jpg" || fileInfo.ExName == ".png" || fileInfo.ExName == ".jpge")
                         {
                             scene.ThumbnailPath = fileInfo.FullPath;
+                            isFindSceneThumb = true;
                             break;
                         }
                     }
+                }
+                if (!isFindSceneThumb)
+                {
+                    errorPath = string.Format("{0}场景中没有找到对应的封面图,请检查数据", dirItem.FullPath);
+                    throw new Exception();
                 }
 
                 FindProduct(dirItem, scene);
@@ -167,9 +179,13 @@ namespace DataModel
         /// <param name="scene">归属场景</param>
         private static void FindProduct(CustomDirectoryInfo sceneDir, SceneInfo scene)
         {
-            errorPath = "FindProduct_" + sceneDir.FullPath;
+            errorPath = "找不到该路径的产品" + sceneDir.FullPath;
             string[] productsDir = Directory.GetDirectories(sceneDir.FullPath);
-
+            if (productsDir.Length == 0)
+            {
+                errorPath = string.Format("{0}场景中没有检查到产品,请检查数据是否存在问题", scene.Name);
+                throw new Exception();
+            }
             for (int i = 0; i < productsDir.Length; i++)
             {
                 CustomDirectoryInfo dirItem;// = dirDic[productsDir[i]];
@@ -178,7 +194,7 @@ namespace DataModel
                     errorPath = productsDir[i];
                     throw new Exception("未检查到相关key值");
                 }
-                errorPath = dirItem.FullPath;
+                errorPath = dirItem.FullPath + "请检查该路径产品是否存在，以及命名是否规范";
                 //去除中间的多余的横线造成的空字数据
                 string[] productAtt = dirItem.everyPathArr[dirItem.everyPathArr.Length - 1].Split('-');
                 List<string> productAttList = new List<string>(productAtt);
@@ -210,6 +226,9 @@ namespace DataModel
 
                 //文件名列表,查找缩略图,以及产品介绍路径
                 string[] filesPath = Directory.GetFiles(dirItem.FullPath);
+                bool isFindPano = false;
+                bool isFindProductThumb = false;
+                bool isFindProductContent = false;
                 for (int j = 0; j < filesPath.Length; j++)
                 {
                     CustomFileInfo fileInfo;
@@ -218,18 +237,38 @@ namespace DataModel
                         if (fileInfo.ExName == ".jpg" || fileInfo.ExName == ".png" || fileInfo.ExName == ".jpge")
                         {
                             if (fileInfo.FileName.IndexOf("thumb") != -1)
+                            {
+                                isFindProductThumb = true;
                                 product.ThumbnailPath = fileInfo.FullPath;
+                            }
                             else
                             {
+                                isFindPano = true;
                                 FindPano(fileInfo, product, scene);
                             }
                             //break;
                         }
                         else if (fileInfo.ExName == ".txt")
                         {
+                            isFindProductContent = true;
                             product.ProductContentPath = fileInfo.FullPath;
                         }
                     }
+                }
+                if (!isFindPano)
+                {
+                    errorPath = string.Format("{0}产品里面，没有找到对应的全景图", dirItem.FullPath);
+                    throw new Exception();
+                }
+                if (!isFindProductThumb)
+                {
+                    errorPath = string.Format("{0}产品里面，没有找到对应的对应的产品缩略图", dirItem.FullPath);
+                    throw new Exception();
+                }
+                if (!isFindProductContent)
+                {
+                    errorPath = string.Format("{0}产品里面，没有找到对应的产品介绍", dirItem.FullPath);
+                    throw new Exception();
                 }
 
                 if (!product.relatedSceneIds.Contains(scene.Id))
@@ -252,7 +291,7 @@ namespace DataModel
         private static void FindPano(CustomFileInfo panoFile, ProductInfo product, SceneInfo scene)
         {
             string errorCode = errorPath;
-            errorPath = "FindPano_" + panoFile.FullPath;
+            errorPath = "请检查该路径全景图是否存在，命名是否规范" + panoFile.FullPath;
 
             PanoInfo pano = new PanoInfo();
             pano.Id = Guid.NewGuid().ToString();

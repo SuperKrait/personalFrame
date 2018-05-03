@@ -101,17 +101,17 @@ namespace LocolFileModel.CustomFileModel
         /// <returns></returns>
         protected string RecursiveCheckDir(string filePath)
         {
-            string[] fileDir = filePath.Split('\\');
+            string[] fileDir = filePath.Split('/');
             if (fileDir.Length < 1)
                 return string.Empty;
-            string tmpFilePath = fileDir[0] + "\\";
+            string tmpFilePath = fileDir[0] + "/";
             for (int i = 1; i < fileDir.Length - 1; i++)
             {
                 if (!Directory.Exists(tmpFilePath + fileDir[i]))
                 {
                     Directory.CreateDirectory(tmpFilePath + fileDir[i]);
                 }
-                tmpFilePath += fileDir[i] + "\\";
+                tmpFilePath += fileDir[i] + "/";
             }
             tmpFilePath += fileDir[fileDir.Length - 1];
             return tmpFilePath;

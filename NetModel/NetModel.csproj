@@ -42,7 +42,15 @@
   <ItemGroup>
     <Compile Include="NetMgr\Http\FormData.cs" />
     <Compile Include="NetMgr\Http\HttpHelper.cs" />
+    <Compile Include="NetMgr\Tcp\CycleData.cs" />
+    <Compile Include="NetMgr\Tcp\DataReaderCommon.cs" />
+    <Compile Include="NetMgr\Tcp\DataWriter.cs" />
+    <Compile Include="NetMgr\Tcp\TcpHelper.cs" />
+    <Compile Include="NetMgr\TimeExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="NetMgr\CommonProtocol\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

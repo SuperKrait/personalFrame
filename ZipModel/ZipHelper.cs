@@ -32,7 +32,7 @@ namespace ZipModel
             try
             {
                 //生成一个新的Zip包堆栈路径
-                string path = Path.Combine(parentFolderName, Path.GetFileName(folderToZip) + "\\");
+                string path = Path.Combine(parentFolderName, Path.GetFileName(folderToZip) + "/");
                 ent = new ZipEntry(path);
                 zipStream.PutNextEntry(ent);
                 zipStream.Flush();
@@ -44,7 +44,7 @@ namespace ZipModel
 
                     byte[] buffer = new byte[fs.Length];
                     fs.Read(buffer, 0, buffer.Length);
-                    path = Path.Combine(parentFolderName, Path.GetFileName(folderToZip) + "\\" + Path.GetFileName(file));
+                    path = Path.Combine(parentFolderName, Path.GetFileName(folderToZip) + "/" + Path.GetFileName(file));
                     ent = new ZipEntry(path);
                     ent.DateTime = DateTime.Now;
                     ent.Size = fs.Length;

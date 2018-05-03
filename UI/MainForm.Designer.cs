@@ -52,24 +52,26 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(30, 61);
+            this.label1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.label1.Location = new System.Drawing.Point(44, 66);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 12);
+            this.label1.Size = new System.Drawing.Size(56, 17);
             this.label1.TabIndex = 1;
-            this.label1.Text = "目录路径:";
+            this.label1.Text = "目录路径";
             // 
             // dirTbx
             // 
-            this.dirTbx.Location = new System.Drawing.Point(99, 58);
+            this.dirTbx.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.dirTbx.Location = new System.Drawing.Point(105, 63);
             this.dirTbx.Name = "dirTbx";
-            this.dirTbx.Size = new System.Drawing.Size(278, 21);
+            this.dirTbx.Size = new System.Drawing.Size(293, 23);
             this.dirTbx.TabIndex = 2;
             // 
             // startBtn
             // 
-            this.startBtn.Location = new System.Drawing.Point(99, 164);
+            this.startBtn.Location = new System.Drawing.Point(105, 164);
             this.startBtn.Name = "startBtn";
-            this.startBtn.Size = new System.Drawing.Size(75, 23);
+            this.startBtn.Size = new System.Drawing.Size(81, 23);
             this.startBtn.TabIndex = 3;
             this.startBtn.Text = "提取数据";
             this.startBtn.UseVisualStyleBackColor = true;
@@ -77,9 +79,9 @@
             // 
             // scanBtn
             // 
-            this.scanBtn.Location = new System.Drawing.Point(399, 58);
+            this.scanBtn.Location = new System.Drawing.Point(427, 64);
             this.scanBtn.Name = "scanBtn";
-            this.scanBtn.Size = new System.Drawing.Size(75, 23);
+            this.scanBtn.Size = new System.Drawing.Size(81, 23);
             this.scanBtn.TabIndex = 4;
             this.scanBtn.Text = "浏览";
             this.scanBtn.UseVisualStyleBackColor = true;
@@ -87,43 +89,45 @@
             // 
             // widthTbx
             // 
-            this.widthTbx.Location = new System.Drawing.Point(99, 112);
+            this.widthTbx.Location = new System.Drawing.Point(105, 109);
             this.widthTbx.Name = "widthTbx";
-            this.widthTbx.Size = new System.Drawing.Size(100, 21);
+            this.widthTbx.Size = new System.Drawing.Size(53, 21);
             this.widthTbx.TabIndex = 5;
             this.widthTbx.Text = "500";
             // 
             // heightTbx
             // 
-            this.heightTbx.Location = new System.Drawing.Point(277, 112);
+            this.heightTbx.Location = new System.Drawing.Point(209, 109);
             this.heightTbx.Name = "heightTbx";
-            this.heightTbx.Size = new System.Drawing.Size(100, 21);
+            this.heightTbx.Size = new System.Drawing.Size(53, 21);
             this.heightTbx.TabIndex = 6;
             this.heightTbx.Text = "500";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(66, 115);
+            this.label2.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.label2.Location = new System.Drawing.Point(80, 109);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(23, 12);
+            this.label2.Size = new System.Drawing.Size(20, 17);
             this.label2.TabIndex = 7;
-            this.label2.Text = "宽:";
+            this.label2.Text = "宽";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(248, 115);
+            this.label3.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.label3.Location = new System.Drawing.Point(187, 109);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(23, 12);
+            this.label3.Size = new System.Drawing.Size(20, 17);
             this.label3.TabIndex = 8;
-            this.label3.Text = "高:";
+            this.label3.Text = "高";
             // 
             // compressBtn
             // 
-            this.compressBtn.Location = new System.Drawing.Point(205, 164);
+            this.compressBtn.Location = new System.Drawing.Point(209, 164);
             this.compressBtn.Name = "compressBtn";
-            this.compressBtn.Size = new System.Drawing.Size(75, 23);
+            this.compressBtn.Size = new System.Drawing.Size(81, 23);
             this.compressBtn.TabIndex = 9;
             this.compressBtn.Text = "压缩文件";
             this.compressBtn.UseVisualStyleBackColor = true;
@@ -131,9 +135,9 @@
             // 
             // uploadBtn
             // 
-            this.uploadBtn.Location = new System.Drawing.Point(302, 164);
+            this.uploadBtn.Location = new System.Drawing.Point(313, 164);
             this.uploadBtn.Name = "uploadBtn";
-            this.uploadBtn.Size = new System.Drawing.Size(75, 23);
+            this.uploadBtn.Size = new System.Drawing.Size(81, 23);
             this.uploadBtn.TabIndex = 10;
             this.uploadBtn.Text = "上传文件";
             this.uploadBtn.UseVisualStyleBackColor = true;
@@ -143,7 +147,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(509, 221);
+            this.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.ClientSize = new System.Drawing.Size(568, 252);
             this.Controls.Add(this.uploadBtn);
             this.Controls.Add(this.compressBtn);
             this.Controls.Add(this.label3);

@@ -71,7 +71,7 @@ namespace ExcelModel
             string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             //新建文件名
             string fileName = "新建Excel文件.xlsx";
-            string  tmpPath = GetFileNameByName(path + "\\" + fileName, 0);
+            string  tmpPath = GetFileNameByName(path + "/" + fileName, 0);
             return tmpPath;
         }
         /// <summary>

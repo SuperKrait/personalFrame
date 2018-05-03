@@ -112,11 +112,12 @@ namespace LogicModel
         }
 
         private string tmpRootDir = "Data";
-        private  string tmpTexDirPath = "TmpPano";
+        private string tmpTexDirPath = "TmpPano";
+        private string tmpTexFlatDirPath = "TmpFlatPano";
         private  string tmpSceneDirPath = "TmpScene";
         private  string tmpProductDirPath = "TmpProduct";
-        private  string excelPath = System.Environment.CurrentDirectory + "\\tmpExcel.xlsx";
-        private string zipPath = "Data.zip";
+        private  string excelPath = System.Environment.CurrentDirectory + "/tmpExcel.xlsx";
+        private string zipPath = "zipFile.zip";
 
         public  void GenExcel()
         {
@@ -159,6 +160,10 @@ namespace LogicModel
                 //excel.WriteKey("商品标签6", "13");
                 excel.WriteKey("商品金额", "0/件");
                 excel.WriteKey("商品使用数量", "1");
+                if (!File.Exists(product.ProductContentPath))
+                {
+                    throw new Exception(string.Format("缺少{0}的商品介绍{1}", product.Name, product.ProductContentPath));
+                }
                 excel.WriteKey("商品说明", Encoding.UTF8.GetString(File.ReadAllBytes(product.ProductContentPath)));
 
             }
@@ -184,6 +189,12 @@ namespace LogicModel
                 Debug.Print("删除文件夹" + tmpProductDirPath);
                 DeleteDir(tmpProductDirPath);
             }
+
+            if (Directory.Exists(tmpTexFlatDirPath))
+            {
+                Debug.Print("删除文件夹" + tmpTexFlatDirPath);
+                DeleteDir(tmpTexFlatDirPath);
+            }
             Debug.Print("创建文件夹" + tmpTexDirPath);
             Directory.CreateDirectory(tmpTexDirPath);
             Debug.Print("创建文件夹" + tmpSceneDirPath);
@@ -191,8 +202,8 @@ namespace LogicModel
             Debug.Print("创建文件夹" + tmpProductDirPath);
             Directory.CreateDirectory(tmpProductDirPath);
             Debug.Print("创建文件夹完毕" );
-
-
+            Directory.CreateDirectory(tmpTexFlatDirPath);
+            Debug.Print("创建文件夹完毕");
         }
 
         private void DeleteDir(string path)
@@ -219,7 +230,7 @@ namespace LogicModel
                     return "场景名称--->" + pairs.Value.Name + "<---缩略图找不到";
                 }
                 CustomFileInfo customFileInfo = DataCenter.GetFileDic()[pairs.Value.ThumbnailPath];
-                string newPath = tmpSceneDirPath + "\\" + pairs.Value.Name + customFileInfo.ExName;
+                string newPath = tmpSceneDirPath + "/" + pairs.Value.Name + customFileInfo.ExName;
 
 
                 if (isGetThumbnailTex)
@@ -253,7 +264,7 @@ namespace LogicModel
 
 
                 CustomFileInfo customFileInfo = DataCenter.GetFileDic()[pairs.Value.ThumbnailPath];
-                string newPath = tmpProductDirPath + "\\" + pairs.Value.Name + customFileInfo.ExName;
+                string newPath = tmpProductDirPath + "/" + pairs.Value.Name + customFileInfo.ExName;
 
                 if (isGetThumbnailTex)
                 {
@@ -286,8 +297,6 @@ namespace LogicModel
                 
 
                 CustomFileInfo customFileInfo = DataCenter.GetFileDic()[pairs.Value.PanoTexturePath];
-                string newPath = tmpTexDirPath + "\\" + pairs.Value.Name + ".jpg";
-
                 //if (isGetThumbnailTex)
                 //{
                 //    System.Drawing.Image image = PictureModel.PictureHelper.GetImage(File.ReadAllBytes(pairs.Value.PanoTexturePath));
@@ -297,7 +306,17 @@ namespace LogicModel
                 //}
                 //else
                 //{
+                string newPath = "";
+                if (pairs.Value.PanoType == "1")
+                {
+                    newPath = tmpTexDirPath + "/" + pairs.Value.Name + ".jpg";
+                }
+                else
+                {
+                    newPath = tmpTexFlatDirPath + "/" + pairs.Value.Name + ".jpg";
+                }
                 File.Copy(pairs.Value.PanoTexturePath, newPath, true);
+
                 pairs.Value.PanoTexturePath = newPath;
                 //}
             }
@@ -310,15 +329,21 @@ namespace LogicModel
 
         #region 网络相关
 
-        private  string serverIp = @"https://www.youtecloud.com/";
+        private string serverIp = @"https://www.youtecloud.com/";
+        private string settingTxt = "setting.ini";
         private  string sessionId = "";
+        private string userId = "";
         private  NetHelper httpHelper = new NetHelper();
 
         /// <summary>
         /// 测试服务器是否开启，并且获取session
         /// </summary>
         public  void TestServerOpened()
-        {            
+        {
+            FileMgrSimple.LoadFile(FileType.Txt, settingTxt, delegate (byte[] data)
+            {
+                serverIp = Encoding.UTF8.GetString(data);
+            });
             httpHelper.GetSessionId(serverIp + @"net_login.jsp",
                 delegate (NetEnum code, string url, string msg)
                 {
@@ -339,14 +364,18 @@ namespace LogicModel
         /// </summary>
         /// <param name="username">用户名</param>
         /// <param name="password">密码</param>
-        public  void Login(string username, string password)
+        public void Login(string username, string password)
         {
-            if (string.IsNullOrEmpty(sessionId))
+            //if (string.IsNullOrEmpty(sessionId))
+            //{
+            //    SetErrorMsg("请先测试服务器！");
+            //    EventSystemMgr.SentEvent(EventSystemConst.LoginFailed);
+            //    return;
+            //}
+            FileMgrSimple.LoadFile(FileType.Txt, settingTxt, delegate (byte[] data)
             {
-                SetErrorMsg("请先测试服务器！");
-                EventSystemMgr.SentEvent(EventSystemConst.LoginFailed);
-                return;
-            }
+                serverIp = Encoding.UTF8.GetString(data);
+            });
 
             Dictionary<string, string> keyDic = new Dictionary<string, string>();
             keyDic.Add("username", username);
@@ -359,6 +388,7 @@ namespace LogicModel
                         JsonData json = JsonMapper.ToObject(msg);
                         if ((bool)json["success"])
                         {
+                            userId = json["data"]["id"].ToString();
                             //UIHelper.ShowMainUI();
                             UIHelper.CloseLoginUI(true);                            
                         }
@@ -387,11 +417,12 @@ namespace LogicModel
             Dictionary<string, string> keyValueDic = new Dictionary<string, string>();
             List<KeyValuePair<string, string>> fileList = new List<KeyValuePair<string, string>>();
 
-            KeyValuePair<string, string> item = new KeyValuePair<string, string>("file", "application/x-zip-compressed|" + zipPath);
+            KeyValuePair<string, string> item = new KeyValuePair<string, string>("zipFile", "application/x-zip-compressed|" + zipPath);
 
             fileList.Add(item);
+            keyValueDic.Add("userId", userId);
 
-            httpHelper.SendByForm(serverIp + @"excleupload/readExcle", sessionId,
+            httpHelper.SendByForm(serverIp + @"excleupload/uploadZipFile", sessionId,
                 keyValueDic, fileList,
                 delegate (NetEnum code, string url, string msg)
                 {
@@ -939,13 +970,18 @@ namespace LogicModel
                         SetErrorMsg("没有找到准备好的商品图文件夹 = " + tmpProductDirPath);
                         return;
                     }
+                    else if (!Directory.Exists(tmpTexFlatDirPath))
+                    {
+                        SetErrorMsg("没有找到准备好的商品图文件夹 = " + tmpTexFlatDirPath);
+                        return;
+                    }
                     else if (!File.Exists(excelPath))
                     {
                         SetErrorMsg("没有找到准备好的excel = " + excelPath);
                         return;
                     }
 
-                    string excelFileName = excelPath.Substring(excelPath.LastIndexOf('\\') + 1);
+                    string excelFileName = excelPath.Substring(excelPath.LastIndexOf('/') + 1);
                     try
                     {
                         if (Directory.Exists(tmpRootDir))
@@ -955,14 +991,15 @@ namespace LogicModel
 
                         Directory.CreateDirectory(tmpRootDir);
 
-                        Directory.Move(tmpTexDirPath, tmpRootDir + "\\" + tmpTexDirPath);
+                        Directory.Move(tmpTexDirPath, tmpRootDir + "/" + tmpTexDirPath);
+                        Directory.Move(tmpTexFlatDirPath, tmpRootDir + "/" + tmpTexFlatDirPath);
 
-                        Directory.Move(tmpSceneDirPath, tmpRootDir + "\\" + tmpSceneDirPath);
+                        Directory.Move(tmpSceneDirPath, tmpRootDir + "/" + tmpSceneDirPath);
 
-                        Directory.Move(tmpProductDirPath, tmpRootDir + "\\" + tmpProductDirPath);
+                        Directory.Move(tmpProductDirPath, tmpRootDir + "/" + tmpProductDirPath);
 
                         
-                        File.Move(excelPath, tmpRootDir + "\\" + excelFileName);
+                        File.Move(excelPath, tmpRootDir + "/" + excelFileName);
 
                         EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressBar, 50);
                         EventSystemMgr.SentEvent(EventSystemConst.UpdateUploadProgressLable, "图量较大，压缩时间可能比较久，请耐心等候...");
@@ -984,24 +1021,24 @@ namespace LogicModel
                     }
                     catch(Exception e)
                     {
-                        if (Directory.Exists(tmpRootDir + "\\" + tmpTexDirPath))
+                        if (Directory.Exists(tmpRootDir + "/" + tmpTexDirPath))
                         {
-                            Directory.Move(tmpRootDir + "\\" + tmpTexDirPath, tmpTexDirPath);
+                            Directory.Move(tmpRootDir + "/" + tmpTexDirPath, tmpTexDirPath);
                         }
 
-                        if (Directory.Exists(tmpRootDir + "\\" + tmpSceneDirPath))
+                        if (Directory.Exists(tmpRootDir + "/" + tmpSceneDirPath))
                         {
-                            Directory.Move(tmpRootDir + "\\" + tmpSceneDirPath, tmpSceneDirPath);
+                            Directory.Move(tmpRootDir + "/" + tmpSceneDirPath, tmpSceneDirPath);
                         }
 
-                        if (Directory.Exists(tmpRootDir + "\\" + tmpProductDirPath))
+                        if (Directory.Exists(tmpRootDir + "/" + tmpProductDirPath))
                         {
-                            Directory.Move(tmpRootDir + "\\" + tmpProductDirPath, tmpProductDirPath);
+                            Directory.Move(tmpRootDir + "/" + tmpProductDirPath, tmpProductDirPath);
                         }
 
-                        if (File.Exists(tmpRootDir + "\\" + excelFileName))
+                        if (File.Exists(tmpRootDir + "/" + excelFileName))
                         {
-                            File.Move(tmpRootDir + "\\" + excelFileName, excelPath);
+                            File.Move(tmpRootDir + "/" + excelFileName, excelPath);
                         }
 
                         if (File.Exists(zipPath))

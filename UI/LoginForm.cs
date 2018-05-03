@@ -24,7 +24,7 @@ namespace UI
             //EventSystemMgr.SentEvent(EventSystemConst.MainThreadSwitch);
             //注册当前form关闭的事件
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(OnApplicationClose);
-            Main.Instance.TestServerOpened();
+            //Main.Instance.TestServerOpened();
         }
 
 

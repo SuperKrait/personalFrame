@@ -4,3 +4,4 @@ F:\CSharp_Projects\WinFormBase\ExcelModel\obj\Debug\Interop.Office.dll
 F:\CSharp_Projects\WinFormBase\ExcelModel\obj\Debug\ExcelModel.csproj.ResolveComReference.cache
 F:\CSharp_Projects\WinFormBase\ExcelModel\obj\Debug\ExcelModel.dll
 F:\CSharp_Projects\WinFormBase\ExcelModel\obj\Debug\ExcelModel.pdb
+F:\CSharp_Projects\WinFormBase\ExcelModel\obj\Debug\ExcelModel.csprojResolveAssemblyReference.cache
